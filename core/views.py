@@ -1,8 +1,9 @@
 from flask import Blueprint, request
-from schema import Rsvp
+from schema import Rsvp, AttendeeSchema
 from models import *
 
 from psycopg2.errors import UniqueViolation
+from dump import readCsv
 
 
 rsvp = Blueprint('rsvp', __name__, url_prefix='/rsvp')
@@ -109,3 +110,23 @@ def verify():
         'status': 'success',
         'is_attending': resp
     }, 200
+
+
+@rsvp.get('/dump')
+def dumpData():
+    data = readCsv('result.csv')
+    print(data[0])
+    schema = AttendeeSchema()
+    for r in data:
+        attendee = schema.load(data[0])
+        db.session.add(attendee)
+    
+    try:
+        db.session.commit()
+    except Exception as e:
+        print(str(e))
+        db.session.rollback()
+    finally:
+        db.session.close()
+
+    return 'ok', 200
