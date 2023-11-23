@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from schema import Rsvp, AttendeeSchema
 from models import *
 
@@ -130,3 +130,13 @@ def dumpData():
         db.session.close()
 
     return 'ok', 200
+
+
+@rsvp.get('/events')
+def fetch_events():
+    events = Event.query.all()
+    resp = [{'title':evnt.title, 'id':evnt.id} for evnt in events]
+    return {
+        'status': 'success',
+        'data': resp
+    }

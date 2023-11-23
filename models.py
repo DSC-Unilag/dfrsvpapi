@@ -38,3 +38,33 @@ class Attendees(db.Model):
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String())
+
+
+    @staticmethod
+    def create_events():
+        events = [
+            "Introduction to GCP: A Guide to Google’s Cloud-9",
+            "Design and Motion: The Two Infinity Stones of Memorable User Experiences",
+            "Transitioning from REST to GraphQL: Enhancing API Efficiency",
+            "Web3 for Web2 Developers",
+            "Unveiling the Power Within: Mastering Google Chrome DevTools for Web Excellence.",
+            "Leveraging User psychology for Product Growth",
+            "Turbocharge Your Angular Applications: The Power of Real-time with Angular Signals",
+            "Navigating the Feasibility and Future Trends of Machine Learning Integration in Flutter Applications",
+            "LangChain and LLMs: Building your own generation AI chatbot trained on your data with LangChain"
+        ]
+
+        for event in events:
+            new = Event(title=event)
+            db.session.add(new)
+        
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print(str(e))
+            return 'failed'
+        finally:
+            db.session.close()
+        
+        return 'ok'
