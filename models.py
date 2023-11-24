@@ -38,12 +38,13 @@ class Attendees(db.Model):
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String())
+    session_id = db.Column(db.Integer)
 
 
     @staticmethod
     def create_events():
         events = [
-            "Introduction to GCP: A Guide to Google’s Cloud-9",
+            "Introduction to GCP: A Guide to Google\'s Cloud-9",
             "Design and Motion: The Two Infinity Stones of Memorable User Experiences",
             "Transitioning from REST to GraphQL: Enhancing API Efficiency",
             "Web3 for Web2 Developers",
@@ -54,8 +55,9 @@ class Event(db.Model):
             "LangChain and LLMs: Building your own generation AI chatbot trained on your data with LangChain"
         ]
 
-        for event in events:
-            new = Event(title=event)
+        for idx, event in enumerate(events):
+            grp = idx//3 + 1
+            new = Event(title=event, session_id=grp)
             db.session.add(new)
         
         try:

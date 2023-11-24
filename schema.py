@@ -5,6 +5,13 @@ from models import Attendees
 
 class Rsvp(ma.Schema):
     ticket_id = fields.String(required=True)
+    event_ids = fields.List(
+        fields.Integer(),
+        required=True
+    )
+
+class checkRsvp(ma.Schema):
+    ticket_id = fields.String(required=True)
     event_id = fields.Integer(required=True)
 
 

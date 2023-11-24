@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from schema import Rsvp, AttendeeSchema
+from schema import Rsvp, AttendeeSchema, checkRsvp
 from models import *
 
 from psycopg2.errors import UniqueViolation
@@ -43,26 +43,31 @@ def sign_up():
             'status': 'error',
             'msg': f"Attendee with specified ticket id {data['ticket_id']} not found"
         }, 404
+    
+    for evnt in data['event_ids']:
+        event = Event.query.get(evnt)
+        if not event:
+            return {
+                'status': 'error',
+                'msg': f"Event with specified id {evnt} not found"
+            }, 404
 
-    event = Event.query.get(data['event_id'])
-    if not event:
-        return {
-            'status': 'error',
-            'msg': f"Event with specified id {data['event_id']} not found"
-        }, 404
+        try:
+            attendee_profile.events.append(event)
+        except UniqueViolation as e:
+            db.session.rollback()
+            return {
+                'status': 'error',
+                'msg': f"It seems you already rspv'd for this event"
+            }, 409
+        except Exception as e:
+            print(str(e))
+            db.session.rollback()
 
     try:
-        attendee_profile.events.append(event)
         db.session.commit()
-    except UniqueViolation as e:
-        db.session.rollback()
-        return {
-            'status': 'error',
-            'msg': f"It seems you already rspv'd for this event"
-        }, 409
     except Exception as e:
-        print(str(e))
-        db.session.rollback()
+        db.session.rollback
     finally:
         db.session.close()
     
@@ -74,7 +79,7 @@ def sign_up():
 
 @rsvp.post('/verify')
 def verify():
-    schema = Rsvp()
+    schema = checkRsvp()
     try:
         data = schema.load(request.get_json(force=True))
     except Exception as e:
@@ -135,7 +140,11 @@ def dumpData():
 @rsvp.get('/events')
 def fetch_events():
     events = Event.query.all()
-    resp = [{'title':evnt.title, 'id':evnt.id} for evnt in events]
+    resp = [{
+        'title':evnt.title, 
+        'id':evnt.id,
+        'session_id':evnt.session_id
+        } for evnt in events]
     return {
         'status': 'success',
         'data': resp
