@@ -3,6 +3,7 @@ from schema import Rsvp, AttendeeSchema, checkRsvp
 from models import *
 
 from psycopg2.errors import UniqueViolation
+from sqlalchemy.exc import IntegrityError
 from dump import readCsv
 
 
@@ -54,7 +55,7 @@ def sign_up():
 
         try:
             attendee_profile.events.append(event)
-        except UniqueViolation as e:
+        except IntegrityError as e:
             db.session.rollback()
             return {
                 'status': 'error',
