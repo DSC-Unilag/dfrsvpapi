@@ -4,6 +4,7 @@ from models import *
 
 from psycopg2.errors import UniqueViolation
 from sqlalchemy.exc import IntegrityError
+from flask_cors import cross_origin
 from dump import readCsv
 
 
@@ -11,6 +12,7 @@ rsvp = Blueprint('rsvp', __name__, url_prefix='/rsvp')
 
 # fetch rsvp sessions
 @rsvp.get('/<ticket_id>')
+@cross_origin()
 def fetch_rsvps(ticket_id):
     attendee_profile: Attendees = Attendees.query.get(ticket_id)
     if not attendee_profile:
@@ -27,6 +29,7 @@ def fetch_rsvps(ticket_id):
 
 # rsvp for a session
 @rsvp.post('/')
+@cross_origin()
 def sign_up():
     schema = Rsvp()
     try:
@@ -79,6 +82,7 @@ def sign_up():
 
 
 @rsvp.post('/verify')
+@cross_origin()
 def verify():
     schema = checkRsvp()
     try:
@@ -119,6 +123,7 @@ def verify():
 
 
 @rsvp.get('/dump')
+@cross_origin()
 def dumpData():
     data = readCsv('result.csv')
     print(data[0])
@@ -139,6 +144,7 @@ def dumpData():
 
 
 @rsvp.get('/events')
+@cross_origin()
 def fetch_events():
     events = Event.query.all()
     resp = [{
