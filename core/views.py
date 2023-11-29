@@ -150,6 +150,8 @@ def fetch_events():
     resp = [{
         'title':evnt.title, 
         'id':evnt.id,
+        'speaker':evnt.speaker,
+        'time': evnt.time,
         'session_id':evnt.session_id
         } for evnt in events]
     return {
