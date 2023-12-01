@@ -55,7 +55,12 @@ def sign_up():
                 'status': 'error',
                 'msg': f"Event with specified id {evnt} not found"
             }, 404
-
+        if event in attendee_profile.events:
+            db.session.rollback()
+            return {
+                'status': 'error',
+                'msg': f"It seems you already rspv'd for this event"
+            }, 409
         try:
             attendee_profile.events.append(event)
         except IntegrityError as e:
@@ -70,14 +75,14 @@ def sign_up():
 
     try:
         db.session.commit()
+        resp = attendee_profile.fetchEvents()
     except Exception as e:
         db.session.rollback
     finally:
         db.session.close()
-    
     return  {
         'status': 'success',
-        # 'data': [event.title for event in attendee_profile.fetchEvents()]
+        'data': [{"id": event.id, "title": event.title} for event in resp]
     }, 202
 
 

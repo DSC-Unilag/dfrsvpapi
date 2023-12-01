@@ -54,15 +54,15 @@ class Event(db.Model):
             },
             {
                 "title": "Design and Motion: The Two Infinity Stones of Memorable User Experiences",
-                "speaker": "Chinaza Icheke- UI/UX Designer"
+                "speaker": "Chinaza Icheke - UI/UX Designer"
             },
             {
                "title": "Transitioning from REST to GraphQL: Enhancing API Efficiency",
-               "speaker": "Adejoke Haastrup-Software Engineer"
+               "speaker": "Adejoke Haastrup - Software Engineer"
             },
             {
                 "title": "Web3 for Web2 Developers",
-                "speaker": "Idris Olubisi- Developer Advocate, Axelar"
+                "speaker": "Idris Olubisi - Developer Advocate, Axelar"
             },
             {
                 "title": "Unveiling the Power Within: Mastering Google Chrome DevTools for Web Excellence.",
@@ -70,19 +70,19 @@ class Event(db.Model):
             },
             {
                 "title": "Leveraging User psychology for Product Growth",
-                "speaker": "TGoodness Ehizode- Product Leader"
+                "speaker": "TGoodness Ehizode - Product Leader"
             },
             {
                 "title": "Turbocharge Your Angular Applications: The Power of Real-time with Angular Signals",
-                "speaker": "Olayinka Atobiloye-GitHub Campus Expert"
+                "speaker": "Olayinka Atobiloye - GitHub Campus Expert"
             },
             {
                 "title": "Navigating the Feasibility and Future Trends of Machine Learning Integration in Flutter Applications",
-                "speaker": "Ogbonna Emmanuella-Flutter Developer"
+                "speaker": "Ogbonna Emmanuella - Flutter Developer"
             },
             {
                 "title": "LangChain and LLMs: Building your own generation AI chatbot trained on your data with LangChain",
-                "speaker": "Salim Oyinlola- Gold Microsoft Ambassador"
+                "speaker": "Salim Oyinlola - Gold Microsoft Ambassador"
             }
         ]
 
