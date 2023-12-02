@@ -38,15 +38,16 @@ def sign_up():
         print(str(e))
         return {
             'status': 'error',
-            'msg': schema.error_messages
+            'msg': str(e)
         }
     
     attendee_profile: Attendees = Attendees.query.get(data['ticket_id'])
     if not attendee_profile:
-        return {
-            'status': 'error',
-            'msg': f"Attendee with specified ticket id {data['ticket_id']} not found"
-        }, 404
+        attendee_profile = Attendees(
+            ticket_id=data['ticket_id'],
+            first_name="late_comer"
+        )
+        db.session.add(attendee_profile)
 
     if attendee_profile.events.all():
         db.session.rollback()

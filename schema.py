@@ -1,17 +1,21 @@
 from extensions import ma, db
-from marshmallow import fields
+from marshmallow import (
+    fields,
+    validate
+)
 from models import Attendees
 
 
 class Rsvp(ma.Schema):
-    ticket_id = fields.String(required=True)
+    ticket_id = fields.String(required=True, validate=validate.Regexp("^DSCA[0-9]{9}$"))
     event_ids = fields.List(
         fields.Integer(),
-        required=True
+        required=True,
+        validate=validate.Length(max=3)
     )
 
 class checkRsvp(ma.Schema):
-    ticket_id = fields.String(required=True)
+    ticket_id = fields.String(required=True, validate=validate.Regexp("^DSCA[0-9]{9}$"))
     event_id = fields.Integer(required=True)
 
 
