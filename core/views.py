@@ -47,7 +47,14 @@ def sign_up():
             'status': 'error',
             'msg': f"Attendee with specified ticket id {data['ticket_id']} not found"
         }, 404
-    
+
+    if attendee_profile.events.all():
+        db.session.rollback()
+        return {
+            'status': 'error',
+            'msg': f"It seems you already rspv'd"
+        }, 409
+
     for evnt in data['event_ids']:
         event = Event.query.get(evnt)
         if not event:
