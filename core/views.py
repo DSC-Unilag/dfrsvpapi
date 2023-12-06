@@ -1,5 +1,15 @@
-from flask import Blueprint, request, jsonify
-from schema import Rsvp, AttendeeSchema, checkRsvp, EventSchema
+from flask import (
+    Blueprint,
+    request, 
+    jsonify
+)
+from schema import (
+    RsvpSchema,
+    AttendeeSchema,
+    checkRsvpSchema,
+    EventSchema,
+    EditRsvpSchema
+)
 from models import *
 
 from psycopg2.errors import UniqueViolation
@@ -12,7 +22,6 @@ rsvp = Blueprint('rsvp', __name__, url_prefix='/rsvp')
 
 # fetch rsvp sessions
 @rsvp.get('/<ticket_id>')
-@cross_origin()
 def fetch_rsvps(ticket_id):
     attendee_profile: Attendees = Attendees.query.get(ticket_id)
     schema = EventSchema()
@@ -32,7 +41,7 @@ def fetch_rsvps(ticket_id):
 @rsvp.post('/')
 @cross_origin()
 def sign_up():
-    schema = Rsvp()
+    schema = RsvpSchema()
     try:
         data = schema.load(request.get_json(force=True))
     except Exception as e:
@@ -57,6 +66,15 @@ def sign_up():
             'msg': f"It seems you already rspv'd"
         }, 409
 
+    if len(attendee_profile.events.all()) == 4:
+        db.session.rollback()
+        return {
+            'status': 'error',
+            'msg': 'maximum number of events reached'
+        }, 400
+    
+    sessions = set()
+
     for evnt in data['event_ids']:
         event = Event.query.get(evnt)
         if not event:
@@ -70,6 +88,13 @@ def sign_up():
                 'status': 'error',
                 'msg': f"It seems you already rspv'd for this event"
             }, 409
+        if event.session_id in sessions:
+            db.session.rollback()
+            return {
+                'status': 'error',
+                'msg': 'cannot rsvp for more than one event in a session'
+            }, 400
+        sessions.add(event.session_id)
         try:
             attendee_profile.events.append(event)
         except IntegrityError as e:
@@ -95,10 +120,136 @@ def sign_up():
     }, 202
 
 
+@rsvp.patch('/<ticket_no>')
+def patch(ticket_no):
+    # parse data
+    schema = EditRsvpSchema()
+    try:
+        data = schema.load(request.get_json(force=True))
+    except Exception as e:
+        print(str(e))
+        return {
+            'status': 'error',
+            'msg': str(e)
+        }, 400
+    
+    # find attendee
+    attendee_profile = Attendees.query.get(ticket_no)
+    if not attendee_profile:
+        return {
+            'status': 'error',
+            'msg': f'Attendee with id {ticket_no} not found'
+        }, 404
+    
+
+    # edit rsvps
+    rsvps = attendee_profile.events
+    sessions = set([event.session_id for event in rsvps])
+
+    for evnt in data['event_ids']:
+        event = Event.query.get(evnt)
+        if not event:
+            return {
+                'status': 'error',
+                'msg': f"Event with specified id {evnt} not found"
+            }, 404
+        if event in rsvps:
+            continue
+        # redundant maybe, but shaa..
+        try:
+            if event.session_id in sessions:
+                db.session.rollback()
+                return {
+                    'status': 'error',
+                    'msg': 'cannot rsvp for more than one event in a session'
+                }, 400
+            attendee_profile.events.append(event)
+            sessions.add(event.session_id)
+        except IntegrityError as e:
+            db.session.rollback()
+            return {
+                'status': 'error',
+                'msg': f"It seems you already rspv'd for this event"
+            }, 409
+        except Exception as e:
+            print(str(e))
+            db.session.rollback()
+
+    return {
+        'status': 'success',
+        'data': EventSchema(many=True).dump(attendee_profile.events)
+    }
+
+
+@rsvp.put('/<ticket_no>')
+def put(ticket_no):
+    schema = EditRsvpSchema()
+    try:
+        data = schema.load(request.get_json(force=True))
+    except Exception as e:
+        print(str(e))
+        return {
+            'status': 'error',
+            'msg': str(e)
+        }, 400
+    
+    # find attendee
+    attendee_profile = Attendees.query.get(ticket_no)
+    if not attendee_profile:
+        return {
+            'status': 'error',
+            'msg': f'Attendee with id {ticket_no} not found'
+        }, 404
+
+    rsvps = attendee_profile.events
+    sessions = set()
+    replace = []
+
+    for evnt in data['event_ids']:
+        event = Event.query.get(evnt)
+        if not event:
+            return {
+                'status': 'error',
+                'msg': f"Event with specified id {evnt} not found"
+            }, 404
+        # redundant maybe, but shaa..
+        try:
+            if event.session_id in sessions:
+                db.session.rollback()
+                return {
+                    'status': 'error',
+                    'msg': 'cannot rsvp for more than one event in a session'
+                }, 400
+            replace.append(event)
+            sessions.add(event.session_id)
+        except IntegrityError as e:
+            db.session.rollback()
+            return {
+                'status': 'error',
+                'msg': f"It seems you already rspv'd for this event"
+            }, 409
+        except Exception as e:
+            print(str(e))
+            db.session.rollback()
+    
+    try:
+        attendee_profile.events = replace
+        resp = EventSchema(many=True).dump(attendee_profile.events)
+        db.session.commit()
+    except Exception as e:
+        print(str(e))
+    finally:
+        db.session.close()
+    
+    return {
+        'status': 'success',
+        'data': resp
+    }, 200
+
 @rsvp.post('/verify')
 @cross_origin()
 def verify():
-    schema = checkRsvp()
+    schema = checkRsvpSchema()
     try:
         data = schema.load(request.get_json(force=True))
     except Exception as e:
