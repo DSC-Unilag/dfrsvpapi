@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from schema import Rsvp, AttendeeSchema, checkRsvp
+from schema import Rsvp, AttendeeSchema, checkRsvp, EventSchema
 from models import *
 
 from psycopg2.errors import UniqueViolation
@@ -15,6 +15,7 @@ rsvp = Blueprint('rsvp', __name__, url_prefix='/rsvp')
 @cross_origin()
 def fetch_rsvps(ticket_id):
     attendee_profile: Attendees = Attendees.query.get(ticket_id)
+    schema = EventSchema()
     if not attendee_profile:
         return {
             'status': 'error',
@@ -23,7 +24,7 @@ def fetch_rsvps(ticket_id):
 
     return {
         'status': 'success',
-        'data': [event.title for event in attendee_profile.fetchEvents()]
+        'data': [schema.dump(event) for event in attendee_profile.fetchEvents()]
     }, 200
 
 

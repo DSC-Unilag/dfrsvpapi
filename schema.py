@@ -3,7 +3,7 @@ from marshmallow import (
     fields,
     validate
 )
-from models import Attendees
+from models import Attendees, Event
 
 
 class Rsvp(ma.Schema):
@@ -24,3 +24,9 @@ class AttendeeSchema(ma.SQLAlchemyAutoSchema):
         model = Attendees
         load_instance = True
         sqla_session=db.session
+
+
+class EventSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Event
+        load_instance = True
