@@ -175,9 +175,17 @@ def patch(ticket_no):
             print(str(e))
             db.session.rollback()
 
+    try:
+        resp = EventSchema(many=True).dump(attendee_profile.events)
+        db.session.commit()
+    except Exception as e:
+        print(str(e))
+    finally:
+        db.session.close()
+
     return {
         'status': 'success',
-        'data': EventSchema(many=True).dump(attendee_profile.events)
+        'data': resp
     }
 
 
