@@ -23,6 +23,7 @@ rsvp = Blueprint('rsvp', __name__, url_prefix='/rsvp')
 
 # fetch rsvp sessions
 @rsvp.get('/<ticket_id>')
+@cross_origin()
 def fetch_rsvps(ticket_id):
     attendee_profile: Attendees = Attendees.query.get(ticket_id)
     schema = EventSchema()
@@ -122,6 +123,7 @@ def sign_up():
 
 
 @rsvp.patch('/<ticket_no>')
+@cross_origin()
 def patch(ticket_no):
     # parse data
     schema = EditRsvpSchema()
@@ -191,6 +193,7 @@ def patch(ticket_no):
 
 
 @rsvp.put('/<ticket_no>')
+@cross_origin()
 def put(ticket_no):
     schema = EditRsvpSchema()
     try:

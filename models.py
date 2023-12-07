@@ -226,3 +226,11 @@ class Venue(db.Model):
             db.session.close()
 
         return 'ok'
+
+
+time_code = {
+    "MYWKLBUP": 1,
+    "QILRK0Q5": 2,
+    "ECW0C6W3": 3,
+    "QRAQWC42": 4
+}

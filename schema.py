@@ -37,3 +37,12 @@ class EventSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Event
         load_instance = True
+
+
+class VerifySchema(ma.Schema):
+    ticket_id = fields.String(required=True, validate=validate.Regexp("^DSCA[0-9]{9}$"))
+    venue_id = fields.String(required=True, validate=validate.Length(max=10))
+    time_code = fields.String(required=True, validate=validate.OneOf([
+        "MYWKLBUP", "QILRK0Q5", "ECW0C6W3", "QRAQWC42"
+    ]))
+    

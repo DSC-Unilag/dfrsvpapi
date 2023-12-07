@@ -9,10 +9,12 @@ from models import (
     Venue
 )
 from schema import EventSchema, VerifySchema
+from flask_cors import cross_origin
 
 venue = Blueprint('venue', __name__, url_prefix='/venue')
 
 @venue.get('/<venue_id>')
+@cross_origin()
 def fetch_venue_events(venue_id):
     events = Event.query.filter_by(venue_id=venue_id).all()
     schema = EventSchema(many=True)
@@ -22,6 +24,7 @@ def fetch_venue_events(venue_id):
     }
 
 @venue.get('/time_codes')
+@cross_origin()
 def fetch_time_code():
     return {
         'status': 'success',
@@ -29,6 +32,7 @@ def fetch_time_code():
     }
 
 @venue.post('/verify')
+@cross_origin()
 def verify():
     schema = VerifySchema()
     try:
