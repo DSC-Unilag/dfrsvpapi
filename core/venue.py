@@ -61,12 +61,7 @@ def verify():
         }
     
     events = venue.events
-    if not events:
-        return {
-            'status': 'error',
-            'code': 12,
-            'msg': f"Unverifiable ticket {data['ticket_id']}- please rsvp for sessions before hand"
-        }
+
     curr = None
     for evnt in events:
         if time_code[data['time_code']] == evnt.session_id:
@@ -75,7 +70,7 @@ def verify():
     if curr not in attendee_profile.events:
         return {
             'status': 'error',
-            'code': 13,
+            'code': 12,
             'msg': 'Attendee did not RSVP for this session'
         }, 400
     else:
