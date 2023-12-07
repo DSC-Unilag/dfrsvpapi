@@ -18,7 +18,9 @@ def create_app(conf):
     db.init_app(app)
     migrate.init_app(app, db)
 
-    from .views import rsvp
+    from .rsvp import rsvp
+    from .venue import venue
     app.register_blueprint(rsvp)
+    app.register_blueprint(venue)
 
     return app
